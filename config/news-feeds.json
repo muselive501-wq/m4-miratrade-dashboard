@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Reuters Japan Markets",
+    "url": "https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best"
+  },
+  {
+    "name": "NHK News",
+    "url": "https://www.nhk.or.jp/rss/news/cat0.xml"
+  }
+]

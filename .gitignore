@@ -1,0 +1,9 @@
+node_modules/
+.env
+data/
+*.log
+*-preview.png
+preview-*.png
+automation-preview.png
+public-live-preview.png
+public-preview.png

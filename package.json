@@ -1,0 +1,20 @@
+{
+  "name": "m4-miratrade-automation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "run:morning": "node server.js --once morning",
+    "run:monitor": "node server.js --once monitor"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "node-cron": "^4.2.1",
+    "pdf-parse": "^1.1.1",
+    "rss-parser": "^3.13.0"
+  }
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "id": "mufg",
+    "name": "三菱UFJ銀行",
+    "url": "https://www.bk.mufg.jp/rept_mkt/gaitame/index.html",
+    "type": "html",
+    "enabled": true
+  },
+  {
+    "id": "smbc",
+    "name": "三井住友銀行",
+    "url": "https://www2.smbc.co.jp/market/pdf/comment.pdf",
+    "type": "pdf",
+    "enabled": true
+  },
+  {
+    "id": "resona",
+    "name": "りそな",
+    "url": "https://www.resonabank.co.jp/kojin/market/gaitame/",
+    "type": "html",
+    "enabled": true
+  },
+  {
+    "id": "mizuho",
+    "name": "みずほ銀行",
+    "url": "https://www.mizuhobank.co.jp/forex/ma.html",
+    "type": "html",
+    "enabled": true
+  }
+]

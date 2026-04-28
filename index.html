@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>M4ミラトレ ダッシュボード</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">M4</span>
+        <div>
+          <h1>M4ミラトレ</h1>
+          <p>朝レポート解析と日中ニュース監視</p>
+        </div>
+      </div>
+      <div class="status-strip" aria-label="運用タイミング">
+        <span>朝 8:30+</span>
+        <span>昼 12:00</span>
+        <span>日中監視</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <h2>4行レポートを貼って、今日の売買可否を一画面で判断。</h2>
+          <p>
+            三菱UFJ、三井住友、りそな、みずほのマーケットレポートからブル・ベア予想を抽出し、
+            自信指数35%以上のときだけ方向を出します。
+          </p>
+        </div>
+        <canvas id="marketCanvas" width="960" height="360" aria-label="ドル円マーケットの視覚化"></canvas>
+      </section>
+
+      <section class="workspace" aria-label="解析ワークスペース">
+        <nav class="tabs" aria-label="機能切り替え">
+          <button class="tab is-active" type="button" data-panel="reportPanel">朝レポート</button>
+          <button class="tab" type="button" data-panel="newsPanel">ニュース監視</button>
+          <button class="tab" type="button" data-panel="promptPanel">AIプロンプト</button>
+        </nav>
+
+        <section id="reportPanel" class="panel is-active">
+          <div class="input-area">
+            <div class="section-head">
+              <h3>朝のレポート解析</h3>
+              <span id="reportClock"></span>
+            </div>
+            <label for="reportText">マーケットレポート本文</label>
+            <textarea id="reportText" spellcheck="false" placeholder="レポート本文をここに貼り付け"></textarea>
+            <div class="actions">
+              <button class="primary" id="analyzeReport" type="button">解析</button>
+              <button class="primary" id="autoAnalyzeReport" type="button">自動取得＆AI解析</button>
+              <button class="ghost" id="clearReport" type="button">消去</button>
+              <button class="ghost" id="loadSample" type="button">サンプル</button>
+            </div>
+          </div>
+
+          <aside class="result-area" aria-live="polite">
+            <div class="judgement" id="judgementBox">
+              <span class="eyebrow">本日のM4ミラトレ判定</span>
+              <strong id="tradeDecision">未解析</strong>
+              <p id="decisionHint">レポート本文を貼って解析してください。</p>
+            </div>
+            <div class="metrics">
+              <div>
+                <span>ブル予想</span>
+                <strong id="bullValue">--%</strong>
+              </div>
+              <div>
+                <span>ベア予想</span>
+                <strong id="bearValue">--%</strong>
+              </div>
+              <div>
+                <span>自信指数</span>
+                <strong id="confidenceValue">--%</strong>
+              </div>
+            </div>
+            <div class="reason-box">
+              <h4>本日の予想根拠</h4>
+              <ul id="reasonList">
+                <li>まだ抽出されていません。</li>
+              </ul>
+            </div>
+            <button class="primary full" id="saveReasons" type="button">根拠をニュース監視へ反映</button>
+          </aside>
+        </section>
+
+        <section id="newsPanel" class="panel">
+          <div class="input-area">
+            <div class="section-head">
+              <h3>日中ニュース監視</h3>
+              <span>手動決済チェック</span>
+            </div>
+            <label for="todayReasons">本日の予想根拠</label>
+            <textarea id="todayReasons" spellcheck="false" placeholder="朝レポート解析の根拠をここへ"></textarea>
+            <label for="newsText">最新ニュース・要人発言</label>
+            <textarea id="newsText" spellcheck="false" placeholder="ニュース本文やRSS要約をここに貼り付け"></textarea>
+            <div class="actions">
+              <button class="primary" id="checkNews" type="button">監視判定</button>
+              <button class="primary" id="autoCheckNews" type="button">RSS自動監視</button>
+              <button class="ghost" id="clearNews" type="button">消去</button>
+            </div>
+          </div>
+
+          <aside class="result-area">
+            <div class="alert-box normal" id="alertBox">
+              <span class="eyebrow">リスク判定</span>
+              <strong id="alertDecision">未チェック</strong>
+              <p id="alertReason">ニュース本文を貼って監視判定してください。</p>
+            </div>
+            <div class="watch-list">
+              <h4>強制警戒ワード</h4>
+              <div class="chips" id="watchChips"></div>
+            </div>
+          </aside>
+        </section>
+
+        <section id="promptPanel" class="panel">
+          <div class="prompt-grid">
+            <article>
+              <h3>朝レポート解析用プロンプト</h3>
+              <pre id="morningPrompt"></pre>
+              <button class="ghost copy" type="button" data-copy="morningPrompt">コピー</button>
+            </article>
+            <article>
+              <h3>日中ニュース監視用プロンプト</h3>
+              <pre id="riskPrompt"></pre>
+              <button class="ghost copy" type="button" data-copy="riskPrompt">コピー</button>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <section class="notes">
+        <div>
+          <h3>自動化状態</h3>
+          <p id="automationStatus">サーバー未確認</p>
+          <button class="ghost compact" id="refreshStatus" type="button">最新状態を読込</button>
+          <button class="ghost compact" id="testNotify" type="button">通知テスト</button>
+        </div>
+        <div>
+          <h3>運用メモ</h3>
+          <p>朝に4行が揃わない日は、昼12時にまとめて確認する運用へ切り替え。</p>
+        </div>
+        <div>
+          <h3>判定基準</h3>
+          <p>ブル予想とベア予想の差が35%以上ならトレード対象。方向は数値が大きい側。</p>
+        </div>
+        <div>
+          <h3>注意</h3>
+          <p>この画面は検証補助ツールです。投資判断と損益責任は利用者本人に帰属します。</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

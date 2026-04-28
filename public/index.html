@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>M4ミラトレ 公開ダッシュボード</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">M4</span>
+        <div>
+          <h1>M4ミラトレ</h1>
+          <p>スプレッドシート連動ダッシュボード</p>
+        </div>
+      </div>
+      <button id="refreshButton" type="button">更新</button>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">今日の本判定</p>
+          <h2 id="decision">読み込み中</h2>
+          <p id="updatedAt">GAS APIから最新データを取得しています。</p>
+        </div>
+        <div class="score" aria-label="自信指数">
+          <span id="confidence">--</span>
+          <small>%</small>
+        </div>
+      </section>
+
+      <section class="metrics">
+        <article>
+          <span>ブル</span>
+          <strong id="bull">--%</strong>
+        </article>
+        <article>
+          <span>ベア</span>
+          <strong id="bear">--%</strong>
+        </article>
+        <article>
+          <span>方向</span>
+          <strong id="direction">--</strong>
+        </article>
+        <article>
+          <span>フェーズ</span>
+          <strong id="phase">--</strong>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <h3>判定根拠</h3>
+          <ul id="reasons">
+            <li>まだデータがありません。</li>
+          </ul>
+        </article>
+        <article class="panel">
+          <h3>メモ</h3>
+          <ul id="notes">
+            <li>まだデータがありません。</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <h3>判定履歴</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>日時</th>
+                  <th>フェーズ</th>
+                  <th>判定</th>
+                  <th>方向</th>
+                  <th>自信</th>
+                </tr>
+              </thead>
+              <tbody id="judgementRows"></tbody>
+            </table>
+          </div>
+        </article>
+        <article class="panel">
+          <h3>ニュース監視</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>日時</th>
+                  <th>アラート</th>
+                  <th>理由</th>
+                </tr>
+              </thead>
+              <tbody id="riskRows"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="notice">
+        <p>このサイトは検証補助ツールです。投資判断と損益責任は利用者本人に帰属します。</p>
+      </section>
+    </main>
+
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

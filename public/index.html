@@ -78,6 +78,35 @@
         </article>
       </section>
 
+      <section class="demo-section">
+        <article class="demo-card main">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">デモトレード検証</span>
+              <h3>仮想損益</h3>
+            </div>
+            <span id="demoOpenState" class="phase-chip">ポジションなし</span>
+          </div>
+          <div class="pnl-display" id="demoPnl">0円</div>
+          <div class="demo-meta">
+            <span id="demoPips">0.0 pips</span>
+            <span id="demoTrades">0 trades</span>
+          </div>
+        </article>
+        <article class="demo-card">
+          <span>勝率</span>
+          <strong id="demoWinRate">0%</strong>
+        </article>
+        <article class="demo-card">
+          <span>勝ち / 負け</span>
+          <strong id="demoWinLoss">0 / 0</strong>
+        </article>
+        <article class="demo-card">
+          <span>仮想数量</span>
+          <strong>1,000 USD</strong>
+        </article>
+      </section>
+
       <section class="content-grid">
         <article class="panel">
           <div class="panel-head">
@@ -117,6 +146,26 @@
                 </tr>
               </thead>
               <tbody id="judgementRows"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h3>デモ売買履歴</h3>
+            <span>仮想検証</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>日時</th>
+                  <th>状態</th>
+                  <th>方向</th>
+                  <th>損益</th>
+                </tr>
+              </thead>
+              <tbody id="demoRows"></tbody>
             </table>
           </div>
         </article>

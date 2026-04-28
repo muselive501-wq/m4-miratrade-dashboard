@@ -84,6 +84,7 @@ function renderDashboard(data) {
   renderList("#notes", splitLines(latest["メモ"]));
   renderJudgementRows(data.judgementHistory || []);
   renderRiskRows(data.riskHistory || []);
+  renderDemo(data.demoStats || {}, data.demoTrades || []);
   drawMarketCanvas(cls, bull, bear, confidence);
 }
 
@@ -115,6 +116,32 @@ function renderRiskRows(rows) {
         )
         .join("")
     : `<tr><td colspan="3">履歴なし</td></tr>`;
+}
+
+function renderDemo(stats, trades) {
+  const pnl = Number(stats.totalPnl || 0);
+  const pnlText = `${pnl.toLocaleString("ja-JP")}円`;
+  const pnlClass = pnl > 0 ? "buy" : pnl < 0 ? "sell" : "hold";
+  const open = stats.openTrade;
+
+  $("#demoPnl").textContent = pnlText;
+  $("#demoPnl").className = `pnl-display ${pnlClass}`;
+  $("#demoPips").textContent = `${stats.totalPips || 0} pips`;
+  $("#demoTrades").textContent = `${stats.totalTrades || 0} trades`;
+  $("#demoWinRate").textContent = `${stats.winRate || 0}%`;
+  $("#demoWinLoss").textContent = `${stats.wins || 0} / ${stats.losses || 0}`;
+  $("#demoOpenState").textContent = open ? `OPEN ${open["方向"]}` : "ポジションなし";
+
+  $("#demoRows").innerHTML = trades.length
+    ? trades
+        .map((row) => `<tr>
+          <td>${escapeHtml(row["エントリー日時"])}</td>
+          <td>${escapeHtml(row["ステータス"])}</td>
+          <td>${escapeHtml(row["方向"])}</td>
+          <td>${escapeHtml(row["損益円"] || "-")}</td>
+        </tr>`)
+        .join("")
+    : `<tr><td colspan="4">デモ売買なし</td></tr>`;
 }
 
 async function loadDashboard() {

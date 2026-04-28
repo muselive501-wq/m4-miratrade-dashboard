@@ -31,6 +31,8 @@ const NEWS_FEEDS = [
   "https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best",
 ];
 
+const DEMO_DEFAULT_UNITS = 1000;
+
 function runMorningPdfLegacy() {
   if (!isWeekdayJst_()) return;
 
@@ -98,6 +100,9 @@ function runM4WebSearch_(label, isPreview) {
 
   PropertiesService.getScriptProperties().setProperty("LATEST_STATE", JSON.stringify(state));
   appendJudgementToSheet_(label, analysis);
+  if (!isPreview) {
+    handleDemoTradeAfterFinal_(analysis);
+  }
 
   sendTelegram_(
     [
@@ -292,6 +297,7 @@ function runMonitor() {
   appendRiskToSheet_(result, newsItems);
 
   if (result.alert) {
+    closeOpenDemoTrades_("緊急アラート");
     sendTelegram_(
       [
         "M4ミラトレ緊急アラート",
@@ -302,6 +308,10 @@ function runMonitor() {
       ].join("\n")
     );
   }
+}
+
+function runDemoClose() {
+  closeOpenDemoTrades_("17:55定時決済");
 }
 
 function testNotify() {
@@ -340,6 +350,22 @@ function setupSpreadsheet() {
     "検出シグナル",
     "ニュース件数",
   ]);
+  ensureSheet_(spreadsheet, "デモトレード", [
+    "取引ID",
+    "ステータス",
+    "方向",
+    "エントリー日時",
+    "エントリー価格",
+    "決済日時",
+    "決済価格",
+    "pips",
+    "損益円",
+    "数量USD",
+    "決済理由",
+    "自信指数",
+    "判定日時",
+    "根拠",
+  ]);
 
   sendTelegram_("M4ミラトレ: スプレッドシートを設定しました。\n" + spreadsheet.getUrl());
 }
@@ -369,10 +395,28 @@ function testRiskSpreadsheetWrite() {
   sendTelegram_("M4ミラトレ: ニュース監視シートへテスト行を書き込みました。");
 }
 
+function testUsdJpyQuote() {
+  const quote = getUsdJpyQuote_();
+  sendTelegram_("M4ミラトレ: USD/JPY価格取得テスト\n" + quote.price + "\nsource: " + quote.source);
+}
+
+function testDemoTradeOpen() {
+  const analysis = {
+    tradeTarget: "あり",
+    direction: "買い方向",
+    bullPercent: 70,
+    bearPercent: 30,
+    confidenceIndex: 40,
+    reasons: ["デモトレード記録テストです。"],
+  };
+  handleDemoTradeAfterFinal_(analysis);
+}
+
 function setupTriggers() {
   deleteTriggers_();
   ScriptApp.newTrigger("runMorning").timeBased().atHour(8).nearMinute(35).everyDays(1).create();
   ScriptApp.newTrigger("runNoon").timeBased().atHour(12).nearMinute(0).everyDays(1).create();
+  ScriptApp.newTrigger("runDemoClose").timeBased().atHour(17).nearMinute(55).everyDays(1).create();
   ScriptApp.newTrigger("runMonitor").timeBased().everyMinutes(15).create();
   sendTelegram_("M4ミラトレ: GAS自動実行トリガーを設定しました。");
 }
@@ -684,6 +728,152 @@ function appendRiskToSheet_(result, newsItems) {
   ]);
 }
 
+function handleDemoTradeAfterFinal_(analysis) {
+  if (analysis.tradeTarget !== "あり") return;
+  if (hasOpenDemoTrade_()) return;
+  if (hasDemoTradeForToday_()) return;
+
+  const quote = getUsdJpyQuote_();
+  const units = getDemoUnits_();
+  const nowText = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
+  const tradeId = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyyMMdd-HHmmss");
+  const sheet = getHistorySheet_("デモトレード");
+
+  sheet.appendRow([
+    tradeId,
+    "OPEN",
+    analysis.direction,
+    nowText,
+    quote.price,
+    "",
+    "",
+    "",
+    "",
+    units,
+    "",
+    analysis.confidenceIndex,
+    nowText,
+    (analysis.reasons || []).join("\n"),
+  ]);
+
+  sendTelegram_(
+    [
+      "M4ミラトレ デモエントリー",
+      "方向: " + analysis.direction,
+      "価格: " + quote.price,
+      "数量: " + units + " USD",
+      "自信指数: " + analysis.confidenceIndex + "%",
+    ].join("\n")
+  );
+}
+
+function closeOpenDemoTrades_(reason) {
+  const sheet = getHistorySheet_("デモトレード");
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return;
+
+  const headers = values[0].map(String);
+  const index = headerIndex_(headers);
+  const quote = getUsdJpyQuote_();
+  const nowText = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
+  let closedCount = 0;
+  let messageLines = [];
+
+  for (let row = 1; row < values.length; row++) {
+    if (String(values[row][index["ステータス"]]) !== "OPEN") continue;
+
+    const direction = String(values[row][index["方向"]]);
+    const entryPrice = Number(values[row][index["エントリー価格"]]);
+    const units = Number(values[row][index["数量USD"]] || getDemoUnits_());
+    const diff = direction === "買い方向" ? quote.price - entryPrice : entryPrice - quote.price;
+    const pips = round_(diff / 0.01, 1);
+    const pnl = Math.round(diff * units);
+    const sheetRow = row + 1;
+
+    sheet.getRange(sheetRow, index["ステータス"] + 1).setValue("CLOSED");
+    sheet.getRange(sheetRow, index["決済日時"] + 1).setValue(nowText);
+    sheet.getRange(sheetRow, index["決済価格"] + 1).setValue(quote.price);
+    sheet.getRange(sheetRow, index["pips"] + 1).setValue(pips);
+    sheet.getRange(sheetRow, index["損益円"] + 1).setValue(pnl);
+    sheet.getRange(sheetRow, index["決済理由"] + 1).setValue(reason);
+
+    closedCount++;
+    messageLines.push("方向: " + direction + " / " + pips + "pips / " + pnl + "円");
+  }
+
+  if (closedCount) {
+    sendTelegram_(
+      [
+        "M4ミラトレ デモ決済",
+        "理由: " + reason,
+        "決済価格: " + quote.price,
+        messageLines.join("\n"),
+      ].join("\n")
+    );
+  }
+}
+
+function hasOpenDemoTrade_() {
+  const rows = readDemoTradeRows_();
+  return rows.some(function (row) {
+    return row["ステータス"] === "OPEN";
+  });
+}
+
+function hasDemoTradeForToday_() {
+  const today = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  const rows = readDemoTradeRows_();
+  return rows.some(function (row) {
+    return String(row["エントリー日時"] || "").indexOf(today) === 0;
+  });
+}
+
+function readDemoTradeRows_() {
+  const props = PropertiesService.getScriptProperties();
+  const spreadsheetId = props.getProperty("SPREADSHEET_ID");
+  if (!spreadsheetId) return [];
+  const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  return readSheetObjects_(spreadsheet, "デモトレード");
+}
+
+function getDemoUnits_() {
+  const units = Number(PropertiesService.getScriptProperties().getProperty("DEMO_TRADE_UNITS") || DEMO_DEFAULT_UNITS);
+  return isFinite(units) && units > 0 ? units : DEMO_DEFAULT_UNITS;
+}
+
+function getUsdJpyQuote_() {
+  const props = PropertiesService.getScriptProperties();
+  const alphaKey = props.getProperty("ALPHA_VANTAGE_API_KEY");
+  if (alphaKey) {
+    const url = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=JPY&apikey=" + encodeURIComponent(alphaKey);
+    const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    const data = JSON.parse(response.getContentText());
+    const rate = data["Realtime Currency Exchange Rate"] && data["Realtime Currency Exchange Rate"]["5. Exchange Rate"];
+    if (rate) return { price: round_(Number(rate), 3), source: "Alpha Vantage" };
+  }
+
+  const yahooUrl = "https://query1.finance.yahoo.com/v8/finance/chart/JPY=X?interval=1m&range=1d";
+  const yahooResponse = UrlFetchApp.fetch(yahooUrl, { muteHttpExceptions: true });
+  const yahooData = JSON.parse(yahooResponse.getContentText());
+  const result = yahooData.chart && yahooData.chart.result && yahooData.chart.result[0];
+  const price = result && result.meta && result.meta.regularMarketPrice;
+  if (!price) throw new Error("USD/JPY quote not available");
+  return { price: round_(Number(price), 3), source: "Yahoo Finance chart" };
+}
+
+function headerIndex_(headers) {
+  const result = {};
+  headers.forEach(function (header, index) {
+    result[header] = index;
+  });
+  return result;
+}
+
+function round_(value, decimals) {
+  const scale = Math.pow(10, decimals);
+  return Math.round(value * scale) / scale;
+}
+
 function getHistorySheet_(name) {
   const props = PropertiesService.getScriptProperties();
   const spreadsheetId = props.getProperty("SPREADSHEET_ID");
@@ -722,6 +912,7 @@ function buildDashboardPayload_() {
     const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
     const judgementHistory = readSheetObjects_(spreadsheet, "判定履歴").reverse();
     const riskHistory = readSheetObjects_(spreadsheet, "ニュース監視").reverse();
+    const demoTrades = readSheetObjects_(spreadsheet, "デモトレード").reverse();
     const latestFinal = judgementHistory.filter(function (row) {
       return row["フェーズ"] === "本判定";
     })[0];
@@ -734,6 +925,8 @@ function buildDashboardPayload_() {
       judgementHistory: judgementHistory.slice(0, 30),
       latestRisk: riskHistory[0] || null,
       riskHistory: riskHistory.slice(0, 30),
+      demoStats: buildDemoStats_(demoTrades),
+      demoTrades: demoTrades.slice(0, 30),
     };
   } catch (error) {
     return {
@@ -742,6 +935,37 @@ function buildDashboardPayload_() {
       updatedAt: new Date().toISOString(),
     };
   }
+}
+
+function buildDemoStats_(trades) {
+  const closed = trades.filter(function (trade) {
+    return trade["ステータス"] === "CLOSED";
+  });
+  const wins = closed.filter(function (trade) {
+    return Number(trade["損益円"] || 0) > 0;
+  }).length;
+  const losses = closed.filter(function (trade) {
+    return Number(trade["損益円"] || 0) < 0;
+  }).length;
+  const totalPnl = closed.reduce(function (sum, trade) {
+    return sum + Number(trade["損益円"] || 0);
+  }, 0);
+  const totalPips = closed.reduce(function (sum, trade) {
+    return sum + Number(trade["pips"] || 0);
+  }, 0);
+  const openTrade = trades.filter(function (trade) {
+    return trade["ステータス"] === "OPEN";
+  })[0] || null;
+
+  return {
+    totalTrades: closed.length,
+    wins: wins,
+    losses: losses,
+    winRate: closed.length ? round_((wins / closed.length) * 100, 1) : 0,
+    totalPnl: Math.round(totalPnl),
+    totalPips: round_(totalPips, 1),
+    openTrade: openTrade,
+  };
 }
 
 function readSheetObjects_(spreadsheet, sheetName) {

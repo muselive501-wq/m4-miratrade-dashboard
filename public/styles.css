@@ -1,14 +1,18 @@
 :root {
-  --ink: #1d2430;
-  --muted: #647084;
-  --line: #d9e0ea;
-  --paper: #f6f8fb;
+  color-scheme: light;
+  --ink: #17202c;
+  --muted: #667287;
+  --line: #dbe2ec;
+  --paper: #f3f6fa;
   --panel: #ffffff;
-  --accent: #2c64d8;
-  --buy: #0f8b6f;
-  --sell: #c14343;
+  --panel-soft: #f9fbfd;
+  --accent: #255edb;
+  --buy: #0c8d6d;
+  --sell: #c54d4d;
   --hold: #5b6677;
-  --shadow: 0 18px 44px rgba(29, 36, 48, 0.1);
+  --gold: #b8892e;
+  --shadow: 0 18px 50px rgba(23, 32, 44, 0.1);
+  --confidence-color: #5b6677;
 }
 
 * {
@@ -17,28 +21,40 @@
 
 body {
   margin: 0;
-  background: var(--paper);
+  background:
+    linear-gradient(180deg, rgba(235, 240, 247, 0.8), rgba(243, 246, 250, 0.96) 340px),
+    var(--paper);
   color: var(--ink);
   font-family: "Segoe UI", "Yu Gothic UI", "Meiryo", sans-serif;
 }
 
+button {
+  font: inherit;
+}
+
 .topbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  padding: 16px clamp(16px, 4vw, 56px);
-  background: rgba(255, 255, 255, 0.94);
-  border-bottom: 1px solid var(--line);
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px clamp(16px, 4vw, 56px);
+  border-bottom: 1px solid rgba(219, 226, 236, 0.92);
+  background: rgba(255, 255, 255, 0.9);
   position: sticky;
   top: 0;
-  z-index: 5;
-  backdrop-filter: blur(14px);
+  z-index: 10;
+  backdrop-filter: blur(16px);
+}
+
+.brand,
+.top-actions,
+.panel-head,
+.bias-row {
+  display: flex;
+  align-items: center;
 }
 
 .brand {
-  display: flex;
-  align-items: center;
   gap: 12px;
 }
 
@@ -50,7 +66,8 @@ body {
   border-radius: 8px;
   background: var(--ink);
   color: #fff;
-  font-weight: 800;
+  font-weight: 900;
+  letter-spacing: 0;
 }
 
 h1,
@@ -61,15 +78,35 @@ p {
 }
 
 h1 {
-  font-size: 1.2rem;
+  font-size: 1.18rem;
+  line-height: 1.2;
 }
 
 .brand p,
 .eyebrow,
 #updatedAt,
-.metrics span,
+.status-grid span,
+.panel-head span,
+.bias-item span,
+.score-caption span,
 .notice {
   color: var(--muted);
+}
+
+.top-actions {
+  gap: 10px;
+}
+
+.sync-state,
+.phase-chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 8px 11px;
+  white-space: nowrap;
 }
 
 button {
@@ -79,137 +116,258 @@ button {
   padding: 0 16px;
   background: var(--accent);
   color: #fff;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
 }
 
-main {
-  width: min(1120px, calc(100% - 28px));
-  margin: 24px auto 48px;
+button:disabled {
+  opacity: 0.68;
+  cursor: wait;
 }
 
-.hero {
+main {
+  width: min(1180px, calc(100% - 28px));
+  margin: 24px auto 56px;
+}
+
+.overview {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 22px;
-  align-items: center;
-  padding: clamp(22px, 5vw, 44px);
+  grid-template-columns: minmax(0, 1.12fr) minmax(360px, 0.88fr);
+  gap: 18px;
+}
+
+.decision-panel,
+.confidence-panel,
+.status-grid article,
+.panel,
+.notice {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--panel);
+  background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--shadow);
 }
 
+.decision-panel {
+  min-height: 330px;
+  padding: clamp(22px, 4vw, 38px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.panel-head {
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .eyebrow {
-  margin-bottom: 10px;
-  font-size: 0.86rem;
-  font-weight: 800;
+  font-size: 0.82rem;
+  font-weight: 900;
 }
 
 h2 {
-  font-size: clamp(2.2rem, 6vw, 4.8rem);
-  line-height: 1;
+  margin: 18px 0 10px;
+  font-size: clamp(3rem, 8vw, 6.7rem);
+  line-height: 0.98;
   letter-spacing: 0;
 }
 
 #updatedAt {
-  margin-top: 16px;
+  margin-top: 10px;
+  font-weight: 700;
 }
 
-.score {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  width: min(28vw, 210px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 14px solid var(--line);
+.bias-row {
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.bias-item {
+  min-width: 72px;
+}
+
+.bias-item strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.55rem;
+}
+
+.bias-track {
+  display: grid;
+  grid-template-columns: var(--bull-width, 50%) var(--bear-width, 50%);
+  flex: 1;
+  min-width: 140px;
+  height: 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf1f6;
+}
+
+.bias-track span:first-child {
+  background: var(--buy);
+}
+
+.bias-track span:last-child {
+  background: var(--sell);
+}
+
+.confidence-panel {
+  position: relative;
+  min-height: 330px;
+  overflow: hidden;
+  padding: 22px;
   background: #fbfcfe;
 }
 
-.score span {
-  font-size: clamp(3rem, 8vw, 5.5rem);
+#marketCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.score-ring {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  width: min(46vw, 190px);
+  aspect-ratio: 1;
+  margin: 20px 0 0 auto;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #fff 0 58%, transparent 59%),
+    conic-gradient(var(--confidence-color) calc(var(--confidence, 0) * 1%), #e1e7f0 0);
+  box-shadow: 0 14px 32px rgba(23, 32, 44, 0.12);
+}
+
+.score-ring span {
+  font-size: clamp(3rem, 8vw, 5.4rem);
+  font-weight: 950;
+}
+
+.score-ring small {
+  font-size: 1.35rem;
   font-weight: 900;
 }
 
-.score small {
-  font-size: 1.4rem;
-  font-weight: 800;
+.score-caption {
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+  margin: 18px 0 0 auto;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.84);
 }
 
-.metrics {
+.score-caption strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 1.35rem;
+}
+
+.status-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin: 18px 0;
 }
 
-.metrics article,
-.panel,
-.notice {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
-}
-
-.metrics article {
+.status-grid article {
   padding: 16px;
+  box-shadow: none;
 }
 
-.metrics strong {
+.status-grid strong {
   display: block;
   margin-top: 6px;
-  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-size: 1.12rem;
 }
 
-.grid {
+.content-grid,
+.history-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   margin-top: 18px;
+}
+
+.content-grid {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+}
+
+.history-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
 }
 
 .panel {
   min-width: 0;
   padding: 18px;
+  box-shadow: none;
+  overflow: hidden;
 }
 
-.panel h3 {
-  margin-bottom: 12px;
+.wide {
+  min-height: 310px;
 }
 
-ul {
-  margin: 0;
-  padding-left: 1.2rem;
-  line-height: 1.72;
+h3 {
+  font-size: 1.08rem;
+}
+
+.text-list {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.text-list li {
+  border-left: 3px solid var(--line);
+  padding: 2px 0 2px 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 
 .table-wrap {
+  margin-top: 12px;
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
 }
 
 table {
   width: 100%;
+  min-width: 540px;
   border-collapse: collapse;
-  min-width: 520px;
 }
 
 th,
 td {
   border-bottom: 1px solid var(--line);
-  padding: 10px 8px;
+  padding: 11px 8px;
   text-align: left;
   vertical-align: top;
 }
 
 th {
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+td {
+  line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 
 .notice {
   margin-top: 18px;
   padding: 14px 18px;
+  box-shadow: none;
 }
 
 .buy {
@@ -224,19 +382,59 @@ th {
   color: var(--hold);
 }
 
-@media (max-width: 760px) {
-  .hero,
-  .grid,
-  .metrics {
+@media (max-width: 860px) {
+  .overview,
+  .content-grid,
+  .history-grid,
+  .status-grid {
     grid-template-columns: 1fr;
   }
 
-  .score {
-    width: min(58vw, 190px);
-    justify-self: center;
+  .confidence-panel {
+    min-height: 280px;
+  }
+
+  .score-ring,
+  .score-caption {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  main {
+    width: min(100% - 20px, 1180px);
+    margin-top: 14px;
   }
 
   .topbar {
     align-items: flex-start;
+  }
+
+  .brand p {
+    display: none;
+  }
+
+  .top-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sync-state {
+    text-align: center;
+  }
+
+  h2 {
+    font-size: 3.2rem;
+  }
+
+  .bias-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bias-track {
+    width: 100%;
+    flex: none;
   }
 }

@@ -12,62 +12,99 @@
         <span class="brand-mark">M4</span>
         <div>
           <h1>M4ミラトレ</h1>
-          <p>スプレッドシート連動ダッシュボード</p>
+          <p>Spreadsheet synced dashboard</p>
         </div>
       </div>
-      <button id="refreshButton" type="button">更新</button>
+      <div class="top-actions">
+        <span id="syncState" class="sync-state">同期待ち</span>
+        <button id="refreshButton" type="button">更新</button>
+      </div>
     </header>
 
     <main>
-      <section class="hero">
-        <div>
-          <p class="eyebrow">今日の本判定</p>
+      <section class="overview">
+        <div class="decision-panel">
+          <div class="panel-head">
+            <span class="eyebrow">今日の本判定</span>
+            <span id="phase" class="phase-chip">--</span>
+          </div>
           <h2 id="decision">読み込み中</h2>
           <p id="updatedAt">GAS APIから最新データを取得しています。</p>
+          <div class="bias-row" aria-label="ブルベア比率">
+            <div class="bias-item buy">
+              <span>ブル</span>
+              <strong id="bull">--%</strong>
+            </div>
+            <div class="bias-track">
+              <span id="bullBar"></span>
+              <span id="bearBar"></span>
+            </div>
+            <div class="bias-item sell">
+              <span>ベア</span>
+              <strong id="bear">--%</strong>
+            </div>
+          </div>
         </div>
-        <div class="score" aria-label="自信指数">
-          <span id="confidence">--</span>
-          <small>%</small>
+
+        <div class="confidence-panel">
+          <canvas id="marketCanvas" width="520" height="220" aria-label="ドル円バイアスの視覚化"></canvas>
+          <div class="score-ring" aria-label="自信指数">
+            <span id="confidence">--</span>
+            <small>%</small>
+          </div>
+          <div class="score-caption">
+            <span>自信指数</span>
+            <strong id="direction">--</strong>
+          </div>
         </div>
       </section>
 
-      <section class="metrics">
+      <section class="status-grid">
         <article>
-          <span>ブル</span>
-          <strong id="bull">--%</strong>
+          <span>朝 8:35</span>
+          <strong>暫定チェック</strong>
         </article>
         <article>
-          <span>ベア</span>
-          <strong id="bear">--%</strong>
+          <span>昼 12:00</span>
+          <strong>本判定</strong>
         </article>
         <article>
-          <span>方向</span>
-          <strong id="direction">--</strong>
+          <span>日中</span>
+          <strong>ニュース監視</strong>
         </article>
         <article>
-          <span>フェーズ</span>
-          <strong id="phase">--</strong>
+          <span>保存先</span>
+          <strong>Google Sheets</strong>
         </article>
       </section>
 
-      <section class="grid">
+      <section class="content-grid">
         <article class="panel">
-          <h3>判定根拠</h3>
-          <ul id="reasons">
+          <div class="panel-head">
+            <h3>判定根拠</h3>
+            <span>最大3件</span>
+          </div>
+          <ul id="reasons" class="text-list">
             <li>まだデータがありません。</li>
           </ul>
         </article>
         <article class="panel">
-          <h3>メモ</h3>
-          <ul id="notes">
+          <div class="panel-head">
+            <h3>取得メモ</h3>
+            <span>公式ソース確認</span>
+          </div>
+          <ul id="notes" class="text-list">
             <li>まだデータがありません。</li>
           </ul>
         </article>
       </section>
 
-      <section class="grid">
-        <article class="panel">
-          <h3>判定履歴</h3>
+      <section class="history-grid">
+        <article class="panel wide">
+          <div class="panel-head">
+            <h3>判定履歴</h3>
+            <span>最新30件</span>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -83,14 +120,18 @@
             </table>
           </div>
         </article>
+
         <article class="panel">
-          <h3>ニュース監視</h3>
+          <div class="panel-head">
+            <h3>ニュース監視</h3>
+            <span>異常検知</span>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>日時</th>
-                  <th>アラート</th>
+                  <th>Alert</th>
                   <th>理由</th>
                 </tr>
               </thead>

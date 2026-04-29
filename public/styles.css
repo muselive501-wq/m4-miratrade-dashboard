@@ -32,10 +32,6 @@ button {
   font: inherit;
 }
 
-a {
-  color: inherit;
-}
-
 .topbar {
   display: flex;
   align-items: center;
@@ -337,42 +333,6 @@ h2 {
   font-weight: 800;
 }
 
-.tool-section {
-  margin: 18px 0;
-}
-
-.tool-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  background:
-    linear-gradient(135deg, rgba(37, 94, 219, 0.08), rgba(12, 141, 109, 0.07)),
-    #fff;
-}
-
-.tool-panel p {
-  max-width: 720px;
-  margin-top: 8px;
-  color: var(--muted);
-  line-height: 1.7;
-}
-
-.download-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  flex: 0 0 auto;
-  border-radius: 8px;
-  padding: 0 16px;
-  background: var(--ink);
-  color: #fff;
-  font-weight: 900;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
 .content-grid,
 .history-grid {
   display: grid;
@@ -487,14 +447,6 @@ td {
     margin-right: auto;
   }
 
-  .tool-panel {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .download-button {
-    width: 100%;
-  }
 }
 
 @media (max-width: 560px) {

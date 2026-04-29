@@ -287,11 +287,12 @@ function runMonitor() {
 
   const stateText = PropertiesService.getScriptProperties().getProperty("LATEST_STATE");
   if (!stateText) {
-    sendTelegram_("M4ミラトレ: 朝の判定がまだ保存されていません。");
     return;
   }
 
   const state = JSON.parse(stateText);
+  if (!shouldRunRiskMonitor_(state)) return;
+
   const newsItems = fetchNews_();
   const result = monitorNewsWithOpenAI_(state.morning.reasons, newsItems);
   appendRiskToSheet_(result, newsItems);
@@ -308,6 +309,12 @@ function runMonitor() {
       ].join("\n")
     );
   }
+}
+
+function shouldRunRiskMonitor_(state) {
+  const morning = state && state.morning ? state.morning : {};
+  if (morning.tradeTarget !== "あり") return false;
+  return hasOpenDemoTrade_();
 }
 
 function runDemoClose() {

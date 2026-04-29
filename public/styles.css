@@ -334,7 +334,8 @@ h2 {
 }
 
 .content-grid,
-.history-grid {
+.history-grid,
+.risk-section {
   display: grid;
   gap: 18px;
   margin-top: 18px;
@@ -410,6 +411,48 @@ td {
   overflow-wrap: anywhere;
 }
 
+.risk-panel {
+  background:
+    linear-gradient(135deg, rgba(184, 137, 46, 0.08), rgba(255, 255, 255, 0.96) 42%),
+    #fff;
+}
+
+.risk-lead {
+  margin-top: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.risk-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.risk-list li {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 14px;
+}
+
+.risk-list strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.risk-list span {
+  display: block;
+  color: var(--muted);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
 .notice {
   margin-top: 18px;
   padding: 14px 18px;
@@ -433,7 +476,8 @@ td {
   .content-grid,
   .history-grid,
   .status-grid,
-  .demo-section {
+  .demo-section,
+  .risk-list {
     grid-template-columns: 1fr;
   }
 
